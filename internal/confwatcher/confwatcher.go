@@ -30,14 +30,7 @@ type ConfWatcher struct {
 // New allocates a ConfWatcher.
 func New(confPath string) (*ConfWatcher, error) {
 	if _, err := os.Stat(confPath); err != nil {
-		if confPath == "mediamtx.yml" {
-			confPath = "rtsp-simple-server.yml"
-			if _, err := os.Stat(confPath); err != nil {
-				return nil, err
-			}
-		} else {
-			return nil, err
-		}
+		return nil, err
 	}
 
 	inner, err := fsnotify.NewWatcher()
@@ -51,7 +44,7 @@ func New(confPath string) (*ConfWatcher, error) {
 
 	err = inner.Add(parentPath)
 	if err != nil {
-		inner.Close()
+		inner.Close() //nolint:errcheck
 		return nil, err
 	}
 
@@ -90,6 +83,7 @@ outer:
 
 			currentWatchedPath, _ := filepath.EvalSymlinks(w.watchedPath)
 			eventPath, _ := filepath.Abs(event.Name)
+			eventPath, _ = filepath.EvalSymlinks(eventPath)
 
 			if currentWatchedPath == "" {
 				// watched file was removed; wait for write event to trigger reload
@@ -120,7 +114,7 @@ outer:
 	}
 
 	close(w.signal)
-	w.inner.Close()
+	w.inner.Close() //nolint:errcheck
 }
 
 // Watch returns a channel that is called after the configuration file has changed.

@@ -31,7 +31,6 @@ define DOCKERFILE_DOCKERHUB_RPI
 FROM scratch
 ARG TARGETPLATFORM
 ADD tmp/rpi_base/$$TARGETPLATFORM.tar /
-RUN apt update && apt install -y --no-install-recommends libcamera0 libfreetype6
 ADD tmp/binaries/$$TARGETPLATFORM.tar.gz /
 ENTRYPOINT [ "/mediamtx" ]
 endef
@@ -41,7 +40,7 @@ define DOCKERFILE_DOCKERHUB_FFMPEG_RPI
 FROM scratch
 ARG TARGETPLATFORM
 ADD tmp/rpi_base/$$TARGETPLATFORM.tar /
-RUN apt update && apt install -y --no-install-recommends libcamera0 libfreetype6 ffmpeg
+RUN apt update && apt install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
 ADD tmp/binaries/$$TARGETPLATFORM.tar.gz /
 ENTRYPOINT [ "/mediamtx" ]
 endef
@@ -61,18 +60,14 @@ dockerhub:
 	cp binaries/*linux_arm64v8.tar.gz tmp/binaries/linux/arm64.tar.gz
 
 	docker buildx rm builder 2>/dev/null || true
-	rm -rf $$HOME/.docker/manifests/*
+	rm -rf "$$HOME/.docker/manifests"/*
 	docker buildx create --name=builder --use
 
 	echo "$$DOCKERFILE_DOCKERHUB_RPI_BASE_32" | docker buildx build . -f - \
 	--provenance=false \
 	--platform=linux/arm/v6 \
 	--output type=tar,dest=tmp/rpi_base/linux/arm/v6.tar
-
-	echo "$$DOCKERFILE_DOCKERHUB_RPI_BASE_32" | docker buildx build . -f - \
-	--provenance=false \
-	--platform=linux/arm/v7 \
-	--output type=tar,dest=tmp/rpi_base/linux/arm/v7.tar
+	cp tmp/rpi_base/linux/arm/v6.tar tmp/rpi_base/linux/arm/v7.tar
 
 	echo "$$DOCKERFILE_DOCKERHUB_RPI_BASE_64" | docker buildx build . -f - \
 	--provenance=false \
@@ -108,4 +103,4 @@ dockerhub:
 	--push
 
 	docker buildx rm builder
-	rm -rf $$HOME/.docker/manifests/*
+	rm -rf "$$HOME/.docker/manifests"/*
