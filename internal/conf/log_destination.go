@@ -26,11 +26,8 @@ func (d LogDestinations) MarshalJSON() ([]byte, error) {
 		case logger.DestinationFile:
 			v = "file"
 
-		case logger.DestinationSyslog:
-			v = "syslog"
-
 		default:
-			return nil, fmt.Errorf("invalid log destination: %v", p)
+			v = "syslog"
 		}
 
 		out[i] = v
@@ -84,8 +81,8 @@ func (d *LogDestinations) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// UnmarshalEnv implements envUnmarshaler.
-func (d *LogDestinations) UnmarshalEnv(s string) error {
-	byts, _ := json.Marshal(strings.Split(s, ","))
+// UnmarshalEnv implements env.Unmarshaler.
+func (d *LogDestinations) UnmarshalEnv(_ string, v string) error {
+	byts, _ := json.Marshal(strings.Split(v, ","))
 	return d.UnmarshalJSON(byts)
 }

@@ -5,43 +5,40 @@ import (
 	"fmt"
 )
 
-// RtspRangeType is the type used in the Range header.
-type RtspRangeType int
+// RTSPRangeType is the type used in the Range header.
+type RTSPRangeType int
 
-// supported rtsp range types.
+// supported values.
 const (
-	RtspRangeTypeUndefined RtspRangeType = iota
-	RtspRangeTypeClock
-	RtspRangeTypeNPT
-	RtspRangeTypeSMPTE
+	RTSPRangeTypeUndefined RTSPRangeType = iota
+	RTSPRangeTypeClock
+	RTSPRangeTypeNPT
+	RTSPRangeTypeSMPTE
 )
 
 // MarshalJSON implements json.Marshaler.
-func (d RtspRangeType) MarshalJSON() ([]byte, error) {
+func (d RTSPRangeType) MarshalJSON() ([]byte, error) {
 	var out string
 
 	switch d {
-	case RtspRangeTypeClock:
+	case RTSPRangeTypeClock:
 		out = "clock"
 
-	case RtspRangeTypeNPT:
+	case RTSPRangeTypeNPT:
 		out = "npt"
 
-	case RtspRangeTypeSMPTE:
+	case RTSPRangeTypeSMPTE:
 		out = "smpte"
 
-	case RtspRangeTypeUndefined:
-		out = ""
-
 	default:
-		return nil, fmt.Errorf("invalid rtsp range type: %v", d)
+		out = ""
 	}
 
 	return json.Marshal(out)
 }
 
 // UnmarshalJSON implements json.Unmarshaler.
-func (d *RtspRangeType) UnmarshalJSON(b []byte) error {
+func (d *RTSPRangeType) UnmarshalJSON(b []byte) error {
 	var in string
 	if err := json.Unmarshal(b, &in); err != nil {
 		return err
@@ -49,16 +46,16 @@ func (d *RtspRangeType) UnmarshalJSON(b []byte) error {
 
 	switch in {
 	case "clock":
-		*d = RtspRangeTypeClock
+		*d = RTSPRangeTypeClock
 
 	case "npt":
-		*d = RtspRangeTypeNPT
+		*d = RTSPRangeTypeNPT
 
 	case "smpte":
-		*d = RtspRangeTypeSMPTE
+		*d = RTSPRangeTypeSMPTE
 
 	case "":
-		*d = RtspRangeTypeUndefined
+		*d = RTSPRangeTypeUndefined
 
 	default:
 		return fmt.Errorf("invalid rtsp range type: '%s'", in)
@@ -67,7 +64,7 @@ func (d *RtspRangeType) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-// UnmarshalEnv implements envUnmarshaler.
-func (d *RtspRangeType) UnmarshalEnv(s string) error {
-	return d.UnmarshalJSON([]byte(`"` + s + `"`))
+// UnmarshalEnv implements env.Unmarshaler.
+func (d *RTSPRangeType) UnmarshalEnv(_ string, v string) error {
+	return d.UnmarshalJSON([]byte(`"` + v + `"`))
 }
